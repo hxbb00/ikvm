@@ -40,7 +40,7 @@ namespace IKVM.Runtime.JNI
 #if NETFRAMEWORK
         static readonly Encoding platformEncoding = Encoding.Default;
 #else
-        static readonly Encoding platformEncoding = CodePagesEncodingProvider.Instance.GetEncoding(0);
+        static readonly Encoding platformEncoding = CodePagesEncodingProvider.Instance.GetEncoding("gb2312");
 #endif
 
         internal static bool IsSupportedJniVersion(int version)

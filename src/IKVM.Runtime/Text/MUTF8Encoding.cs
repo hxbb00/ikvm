@@ -10,12 +10,12 @@ namespace IKVM.Runtime.Text
     internal class MUTF8Encoding : Encoding
     {
 
-        static MUTF8Encoding mutf8;
+        static MUTF8EncodingX mutf8;
 
         /// <summary>
         /// Gets an instance of the Sun modified UTF8 encoding.
         /// </summary>
-        public static MUTF8Encoding MUTF8 => mutf8 ??= new MUTF8Encoding();
+        public static MUTF8EncodingX MUTF8 => mutf8 ??= new MUTF8EncodingX();
 
         /// <summary>
         /// Scans for the position of the first NULL given the specified pointer, up to a maximum offset of <paramref name="max"/>.
