@@ -462,7 +462,7 @@ jobs:
         path: ${{ env.IKVMPATH }}/dist/TestResults
   release:
     name: Release
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/')
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/') || startsWith(github.ref, 'refs/heads/hotfix/')
     needs:
     - test
     runs-on: ubuntu-latest
@@ -505,7 +505,7 @@ jobs:
       working-directory: dist
     - name: Compress Binaries
       shell: pwsh
-      run: cd dist && gi bin/* | %{ $tfm = $_.Name; Push-Location "bin/$tfm"; zip -r "../IKVM-${env:GitVersion_SemVer}-bin-$tfm.zip" .; tar czvf "../IKVM-${env:GitVersion_SemVer}-bin-$tfm.zip" .; Pop-Location }
+      run: cd dist && gi bin/* | %{ $tfm = $_.Name; Push-Location "bin/$tfm"; zip -r "../IKVM-${env:GitVersion_SemVer}-bin-$tfm.zip" .; tar czvf "../IKVM-${env:GitVersion_SemVer}-bin-$tfm.tar.gz" .; Pop-Location }
     - name: Download Tools
       uses: actions/download-artifact@v3
       with:

@@ -7,16 +7,19 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <PreserveCompilationContext>true</PreserveCompilationContext>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+        <LangVersion>11</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
         <None Remove="Java\java\lang\ClassTests.java" />
+        <None Remove="Java\java\lang\ThrowableTests.java" />
         <None Remove="JNI\JniTests.java" />
         <None Remove="Runtime\Vfs\VfsTestResource.txt" />
     </ItemGroup>
 
     <ItemGroup>
         <EmbeddedResource Include="Java\java\lang\ClassTests.java" />
+        <EmbeddedResource Include="Java\java\lang\ThrowableTests.java" />
         <EmbeddedResource Include="JNI\JniTests.java" />
         <EmbeddedResource Include="Runtime\Vfs\VfsTestResource.txt" />
     </ItemGroup>
@@ -34,7 +37,6 @@
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
         <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
         <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     </ItemGroup>
 
     <ItemGroup>

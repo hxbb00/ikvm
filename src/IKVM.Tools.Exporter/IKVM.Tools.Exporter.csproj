@@ -7,7 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     </ItemGroup>
 
@@ -37,6 +36,34 @@
         <Compile Include="..\IKVM.Runtime\StubGen\**\*.cs" LinkBase="IKVM.Runtime\StubGen" />
         <Compile Include="..\IKVM.Runtime\LoadMode.cs" LinkBase="IKVM.Runtime" />
         <Compile Include="..\IKVM.Runtime\CodeGenOptions.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\MethodWrapper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\SmartMethodWrapper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\MemberFlags.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\FieldWrapper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\SimpleOpCode.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\GhostMethodWrapper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\AccessStubMethodWrapper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\AccessStubConstructorMethodWrapper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\TypicalMethodWrapper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\SimpleCallMethodWrapper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\DefaultInterfaceMethodWrapper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\ExModifiers.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\MethodParametersEntry.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\EnumHelper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\AttributeHelper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\ArrayUtil.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\TypeNameUtil.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\StringConstants.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\UnicodeUtil.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\Annotation.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\TypeFlags.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\PrimitiveTypeWrapper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\ArrayTypeWrapper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\VerifierTypeWrapper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\UnloadableTypeWrapper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\CompiledTypeWrapper.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\NamePrefix.cs" LinkBase="IKVM.Runtime" />
+        <Compile Include="..\IKVM.Runtime\NestedTypeName.cs" LinkBase="IKVM.Runtime" />
     </ItemGroup>
 
     <ItemGroup>

@@ -28,6 +28,8 @@ using System.Diagnostics;
 using System.Threading;
 using System.Runtime.CompilerServices;
 
+using IKVM.Runtime;
+
 #if NETCOREAPP
 using System.Runtime.Loader;
 #endif
@@ -123,10 +125,15 @@ namespace IKVM.Internal
 #if IMPORTER
                     throw new FatalCompilerErrorException(Message.CoreClassesMissing);
 #else
-                    JVM.CriticalFailure("Failed to find core classes in core library", null);
+                    throw new InternalException("Failed to find core classes in core library.");
 #endif
                 }
             }
+        }
+
+        internal static bool IsRemappedType(Type type)
+        {
+            return remappedTypes.ContainsKey(type);
         }
 
         internal ClassLoaderWrapper(CodeGenOptions codegenoptions, object javaClassLoader)
@@ -135,11 +142,6 @@ namespace IKVM.Internal
 #if !IMPORTER && !FIRST_PASS && !EXPORTER
             this.javaClassLoader = (java.lang.ClassLoader)javaClassLoader;
 #endif
-        }
-
-        internal static bool IsRemappedType(Type type)
-        {
-            return remappedTypes.ContainsKey(type);
         }
 
 #if IMPORTER || EXPORTER
@@ -611,18 +613,13 @@ namespace IKVM.Internal
             // (note that other types with manufactured inner classes such as Attribute and Enum can't be generic)
             if (name.EndsWith(DotNetTypeWrapper.DelegateInterfaceSuffix))
             {
-                TypeWrapper outer = FindOrLoadGenericClass(name.Substring(0, name.Length - DotNetTypeWrapper.DelegateInterfaceSuffix.Length), mode);
+                var outer = FindOrLoadGenericClass(name.Substring(0, name.Length - DotNetTypeWrapper.DelegateInterfaceSuffix.Length), mode);
                 if (outer != null && outer.IsFakeTypeContainer)
-                {
-                    foreach (TypeWrapper tw in outer.InnerClasses)
-                    {
+                    foreach (var tw in outer.InnerClasses)
                         if (tw.Name == name)
-                        {
                             return tw;
-                        }
-                    }
-                }
             }
+
             // generic class name grammar:
             //
             // mangled(open_generic_type_name) "_$$$_" M(parameter_class_name) ( "_$$_" M(parameter_class_name) )* "_$$$$_"
@@ -630,18 +627,16 @@ namespace IKVM.Internal
             // mangled() is the normal name mangling algorithm
             // M() is a replacement of "__" with "$$005F$$005F" followed by a replace of "." with "__"
             //
-            int pos = name.IndexOf("_$$$_");
+            var pos = name.IndexOf("_$$$_");
             if (pos <= 0 || !name.EndsWith("_$$$$_"))
-            {
                 return null;
-            }
-            TypeWrapper def = LoadClass(name.Substring(0, pos), mode);
+
+            var def = LoadClass(name.Substring(0, pos), mode);
             if (def == null || !def.TypeAsTBD.IsGenericTypeDefinition)
-            {
                 return null;
-            }
-            Type type = def.TypeAsTBD;
-            List<string> typeParamNames = new List<string>();
+
+            var type = def.TypeAsTBD;
+            var typeParamNames = new List<string>();
             pos += 5;
             int start = pos;
             int nest = 0;
@@ -649,9 +644,8 @@ namespace IKVM.Internal
             {
                 pos = name.IndexOf("_$$", pos);
                 if (pos == -1)
-                {
                     return null;
-                }
+
                 if (name.IndexOf("_$$_", pos, 4) == pos)
                 {
                     if (nest == 0)
@@ -659,6 +653,7 @@ namespace IKVM.Internal
                         typeParamNames.Add(name.Substring(start, pos - start));
                         start = pos + 4;
                     }
+
                     pos += 4;
                 }
                 else if (name.IndexOf("_$$$_", pos, 5) == pos)
@@ -685,10 +680,11 @@ namespace IKVM.Internal
                     pos += 3;
                 }
             }
-            Type[] typeArguments = new Type[typeParamNames.Count];
+
+            var typeArguments = new Type[typeParamNames.Count];
             for (int i = 0; i < typeArguments.Length; i++)
             {
-                string s = (string)typeParamNames[i];
+                var s = typeParamNames[i];
                 // only do the unmangling for non-generic types (because we don't want to convert
                 // the double underscores in two adjacent _$$$_ or _$$$$_ markers)
                 if (s.IndexOf("_$$$_") == -1)
@@ -696,15 +692,14 @@ namespace IKVM.Internal
                     s = s.Replace("__", ".");
                     s = s.Replace("$$005F$$005F", "__");
                 }
+
                 int dims = 0;
                 while (s.Length > dims && s[dims] == 'A')
-                {
                     dims++;
-                }
+
                 if (s.Length == dims)
-                {
                     return null;
-                }
+
                 TypeWrapper tw;
                 switch (s[dims])
                 {
@@ -743,12 +738,13 @@ namespace IKVM.Internal
                     default:
                         return null;
                 }
+
                 if (dims > 0)
-                {
                     tw = tw.MakeArrayType(dims);
-                }
+
                 typeArguments[i] = tw.TypeAsSignatureType;
             }
+
             try
             {
                 type = type.MakeGenericType(typeArguments);
@@ -758,49 +754,46 @@ namespace IKVM.Internal
                 // one of the typeArguments failed to meet the constraints
                 return null;
             }
-            TypeWrapper wrapper = GetWrapperFromType(type);
+
+            var wrapper = GetWrapperFromType(type);
             if (wrapper != null && wrapper.Name != name)
             {
                 // the name specified was not in canonical form
                 return null;
             }
+
             return wrapper;
         }
 
         protected virtual TypeWrapper LoadClassImpl(string name, LoadMode mode)
         {
-            TypeWrapper tw = FindOrLoadGenericClass(name, mode);
+            var tw = FindOrLoadGenericClass(name, mode);
             if (tw != null)
-            {
                 return tw;
-            }
-#if !IMPORTER && !FIRST_PASS && !EXPORTER
+
+#if !FIRST_PASS && !IMPORTER && !EXPORTER
+
             if ((mode & LoadMode.Load) == 0)
-            {
                 return null;
-            }
+
             Profiler.Enter("ClassLoader.loadClass");
             try
             {
-                java.lang.Class c = GetJavaClassLoader().loadClassInternal(name);
+                var c = GetJavaClassLoader().loadClassInternal(name);
                 if (c == null)
-                {
                     return null;
-                }
-                TypeWrapper type = TypeWrapper.FromClass(c);
+
+                var type = TypeWrapper.FromClass(c);
                 if (type.Name != name)
-                {
-                    // the class loader is trying to trick us
                     return null;
-                }
+
                 return type;
             }
             catch (java.lang.ClassNotFoundException x)
             {
                 if ((mode & LoadMode.MaskReturn) == LoadMode.ThrowClassNotFound)
-                {
                     throw new ClassLoadingException(ikvm.runtime.Util.mapException(x), name);
-                }
+
                 return null;
             }
             catch (java.lang.ThreadDeath)
@@ -810,27 +803,29 @@ namespace IKVM.Internal
             catch (Exception x)
             {
                 if ((mode & LoadMode.SuppressExceptions) == 0)
-                {
                     throw new ClassLoadingException(ikvm.runtime.Util.mapException(x), name);
-                }
+
                 if (Tracer.ClassLoading.TraceError)
                 {
-                    java.lang.ClassLoader cl = GetJavaClassLoader();
+                    var cl = GetJavaClassLoader();
                     if (cl != null)
                     {
-                        System.Text.StringBuilder sb = new System.Text.StringBuilder();
-                        string sep = "";
+                        var sb = new System.Text.StringBuilder();
+                        var sep = "";
                         while (cl != null)
                         {
                             sb.Append(sep).Append(cl);
                             sep = " -> ";
                             cl = cl.getParent();
                         }
+
                         Tracer.Error(Tracer.ClassLoading, "ClassLoader chain: {0}", sb);
                     }
-                    Exception m = ikvm.runtime.Util.mapException(x);
+
+                    var m = ikvm.runtime.Util.mapException(x);
                     Tracer.Error(Tracer.ClassLoading, m.ToString() + Environment.NewLine + m.StackTrace);
                 }
+
                 return null;
             }
             finally
@@ -1322,10 +1317,9 @@ namespace IKVM.Internal
             {
                 return GetBootstrapClassLoader().LoadClassByDottedName(name);
             }
-            catch (Exception x)
+            catch (Exception e)
             {
-                JVM.CriticalFailure("Loading of critical class failed", x);
-                return null;
+                throw new InternalException("Loading of critical class failed.", e);
             }
 #endif
         }
